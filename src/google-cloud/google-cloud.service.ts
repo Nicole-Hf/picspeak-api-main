@@ -9,15 +9,15 @@ export class GoogleCloudService {
   constructor(
     private readonly configService: ConfigService,
     private readonly awsService: AwsService,
-  ) {}
-  
+  ) { }
+
   async getTranscription(FileAudio: Buffer, language: string) {
     const audioName = `audio-ORIGINAL-${Date.now()}`;
     const lenguageCode = this.getLenguageCodeSpeechToText(language);
 
     const speech = require('@google-cloud/speech');
     const client = new speech.SpeechClient();
-   
+
     const audioBytes = FileAudio.toString('base64');
     const audio = {
       content: audioBytes,
@@ -33,7 +33,7 @@ export class GoogleCloudService {
       audio: audio,
       config: config,
     };
-  
+
     // Detects speech in the audio file
     const [response] = await client.recognize(request);
     const transcription = response.results
@@ -41,14 +41,14 @@ export class GoogleCloudService {
       .join('\n');
 
     const { audioUrl } = await this.awsService.uploadAudioToS3(FileAudio, audioName);
-    
+
     return {
       transcription,
       audioUrl,
     };
   }
 
-  async textToSpeech(text: string, lenguage: string){
+  async textToSpeech(text: string, lenguage: string) {
     const audioName = `audio-TRANSLATED-${Date.now()}`;
     const lenguageCode = this.getLenguageCodeForTextToSpeech(lenguage);
 
@@ -61,11 +61,11 @@ export class GoogleCloudService {
 
     // Construct the request
     const request = {
-      input: {text: text},
+      input: { text: text },
       // Select the language and SSML voice gender (optional)
-      voice: {languageCode: lenguageCode, ssmlGender: 'FEMALE'},
+      voice: { languageCode: lenguageCode, ssmlGender: 'FEMALE' },
       // select the type of audio encoding
-      audioConfig: {audioEncoding: 'MP3'},
+      audioConfig: { audioEncoding: 'MP3' },
     };
 
     // Make the API call to synthesize the provided text
@@ -77,7 +77,7 @@ export class GoogleCloudService {
     };
   }
 
-  
+
   getLenguageCodeForTextToSpeech(lenguage: string) {
     //mapa de idiomas
     const languages = {
@@ -124,8 +124,8 @@ export class GoogleCloudService {
     return languages[lenguage.toLocaleLowerCase()];
   }
 
-  async translateText(text: string, target: string){
-    const {Translate} = require('@google-cloud/translate').v2;
+  async translateText(text: string, target: string) {
+    const { Translate } = require('@google-cloud/translate').v2;
     const translate = new Translate();
     const [translation] = await translate.translate(text, target);
     return translation;
