@@ -487,31 +487,37 @@ export class ConfigurationService {
             { status: false }
         );
 
-        // Procesar los nuevos elementos seleccionados
+        const promesasDeActualizacion = [];
+
         for (const e of inappropriateContentUser) {
-            // Buscar el objeto inappropriateContent correspondiente al nombre
-            const inappropriateContent = await this.inappropriateContentRepository.findOne({ where: { name: e } });
+            // Buscar todos los elementos inapropiados con el mismo nombre
+            const inappropriateContents = await this.inappropriateContentRepository.find({ where: { name: e } });
 
-            if (inappropriateContent) {
-                // Encontrar o crear el registro del usuario con el contenido inapropiado
-                let registro = await this.inappropriateContentUserRepository.findOne({
-                    where: { individualuser: { id }, inappropiateContent: { id: inappropriateContent.id } }
-                });
-
-                if (!registro) {
-                    registro = this.inappropriateContentUserRepository.create({
-                        individualuser: { id },
-                        inappropiateContent: inappropriateContent,
-                        status: true
+            if (inappropriateContents.length > 0) {
+                for (const inappropriateContent of inappropriateContents) {
+                    // Encontrar o crear el registro del usuario con el contenido inapropiado
+                    let registro = await this.inappropriateContentUserRepository.findOne({
+                        where: { individualuser: { id }, inappropiateContent: { id: inappropriateContent.id } }
                     });
-                } else {
-                    registro.status = true;
-                }
 
-                // Guardar el registro actualizado o creado
-                await this.inappropriateContentUserRepository.save(registro);
+                    if (!registro) {
+                        registro = this.inappropriateContentUserRepository.create({
+                            individualuser: { id },
+                            inappropiateContent: inappropriateContent,
+                            status: true
+                        });
+                    } else {
+                        registro.status = true;
+                    }
+
+                    // Guardar el registro actualizado o creado
+                    promesasDeActualizacion.push(this.inappropriateContentUserRepository.save(registro));
+                }
             }
         }
+
+        // Esperar a que todas las promesas de actualización se resuelvan
+        await Promise.all(promesasDeActualizacion);
 
         return { message: 'success' };
     }
