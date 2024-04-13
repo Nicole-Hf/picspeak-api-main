@@ -44,9 +44,24 @@ export class InappropriateContentService {
 
         return { message: 'success', data: createdInappropriateContents };
     }
-    
+
     async getInappropriateContents() {
         return { message: 'success', data: await this.inappropriateContentRepository.find() };
+    }
+
+    async getInappropriateContentsFiltered() {
+        const data = await this.inappropriateContentRepository.find();
+        const uniqueNames = {};
+
+        const filteredData = data.filter(obj => {
+            if (uniqueNames[obj.name]) {
+                return false;
+            }
+            uniqueNames[obj.name] = true;
+            return true;
+        });
+
+        return { message: 'success', data: filteredData };
     }
 
     async getInappropriateContent(id: number) {

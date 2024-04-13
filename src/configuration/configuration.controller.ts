@@ -73,7 +73,7 @@ export class ConfigurationController {
     //actualiza los contenidos inapropiados seleccionados
     @Post('user/:id/inappropriate-contents-user/') //para actualizar los contenidos inapropiados seleccionados
     updateSelectInappropriateContentsUser(@Param('id', ParseIntPipe) id: number, @Body() newInappropriateContentUser: string[]) {
-        return this.configurationService.updateSelectInappropriateContentsUser(id, newInappropriateContentUser);
+        return this.configurationService.registerSelectFilteredInappropriateContentsUser(id, newInappropriateContentUser);
     }
 
     //crea la relación por defecto entre todos los contenidos inapropiados y un usuario 

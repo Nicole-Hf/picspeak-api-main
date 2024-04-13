@@ -249,7 +249,7 @@ export class ConfigurationService {
             //return "no hay user language";
         }
     }
-    
+
     //INTEREST USER
     async getInterestsUser(id: number) {
         const userFound = await this.individualUserRepository.findOne({ where: { id } });
@@ -479,4 +479,51 @@ export class ConfigurationService {
 
         return { message: 'success' };
     }
+
+    async registerSelectFilteredInappropriateContentsUser(id: number, inappropriateContentUser: string[]) {
+        const promesaObtencion = [];
+        const promesasDeActualizacion = [];
+
+        // Buscar y desactivar todos los registros existentes del usuario
+        const inappropriateContentUserFound = await this.inappropriateContentUserRepository.find({
+            where: {
+                status: true,
+                individualuser: { id }
+            }
+        });
+
+        // Desactivar los registros encontrados y guardar las promesas de actualización
+        inappropriateContentUserFound.forEach(async (e) => {
+            e.status = false;
+            promesaObtencion.push(this.inappropriateContentUserRepository.save(e));
+        });
+
+        // Esperar a que todas las promesas de desactivación se resuelvan
+        await Promise.all(promesaObtencion);
+
+        // Procesar los nuevos elementos seleccionados
+        for (const e of inappropriateContentUser) {
+            // Buscar el objeto inappropriateContent correspondiente al nombre
+            const inappropriateContent = await this.inappropriateContentRepository.findOne({ where: { name: e } });
+
+            if (inappropriateContent) {
+                // Encontrar todos los registros del usuario con el mismo nombre
+                const registrosEncontrados = await this.inappropriateContentUserRepository.find({
+                    where: { individualuser: { id }, inappropiateContent: { id: inappropriateContent.id } },
+                });
+
+                // Actualizar todos los registros encontrados
+                registrosEncontrados.forEach(registro => {
+                    registro.status = true; // Configurar el estado a true
+                    promesasDeActualizacion.push(this.inappropriateContentUserRepository.save(registro)); // Guardar la promesa de actualización
+                });
+            }
+        }
+
+        // Esperar a que todas las promesas de actualización se resuelvan
+        await Promise.all(promesasDeActualizacion);
+
+        return { message: 'success' };
+    }
+
 }

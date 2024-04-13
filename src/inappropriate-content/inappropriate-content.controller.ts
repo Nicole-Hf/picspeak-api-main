@@ -13,7 +13,7 @@ export class InappropriateContentController {
 
     @Get()
     getInappropriateContents() {
-        return this.inappropriateContentService.getInappropriateContents();
+        return this.inappropriateContentService.getInappropriateContentsFiltered();
     }
 
     @Post()
