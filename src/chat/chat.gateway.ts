@@ -1,7 +1,6 @@
-import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { ChatService } from './chat.service';
 import { Server, Socket } from 'socket.io';
-import { CreateResourceDto } from 'src/resources/dto/create-resource.dto';
 import { CreateMessageDto } from 'src/message/dto/create-message.dto';
 import { UsersService } from 'src/users/users.service';
 
@@ -40,16 +39,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       // obtener mensajes offline
       const offlineMessages = await this.chatService.getOfflineMessages(user.id);
-
-      if (!offlineMessages || offlineMessages.length === 0) {
-        return;
+      if (offlineMessages?.length) {
+        offlineMessages.forEach(message => {
+          client.emit('newMessage', message);
+        });
       }
-
-      // Enviar mensajes
-      offlineMessages.forEach(message => {
-        client.emit('newMessage', message);
-      });
-
     } catch (error) {
       console.error('Error fetching offline messages: ', error);
     }
@@ -92,7 +86,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
    */
   @SubscribeMessage('chatJoined')
   async joinChat(client: Socket, payload: { chat: string, senderUserId: number, receivingUserId: number, fondo: string }) {
-    const { chat, senderUserId, receivingUserId, fondo } = payload;
+    const { senderUserId, receivingUserId } = payload;
+    console.log('joinedChat', payload)
 
     // Check if the chat already exists or create a new one
     const existingChat = await this.chatService.findExistingChat(senderUserId, receivingUserId);
@@ -100,6 +95,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (existingChat) {
       //Traer las conversaciones
       const messages = await this.chatService.getAllChatsForUser(existingChat.id);
+      console.log('MENSAJES CHAT', messages)
 
       //Enviar los mensajes
       client.emit('messagesLoaded', messages);
@@ -109,39 +105,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  /*
-  @SubscribeMessage('join')
-  async joinChat(client: Socket, payload: { chat: string, senderUserId: number, receivingUserId: number, fondo: string }) {
-    const { chat, senderUserId, receivingUserId, fondo } = payload;
-
-    // Check if the chat already exists or create a new one
-    const existingChat = await this.chatService.findExistingChat(senderUserId, receivingUserId);
-
-    if (existingChat) {
-      //Traer las conversaciones
-      const messages = await this.chatService.getMessagesByChatId(existingChat.id);
-      console.log('MESSAGES', messages)
-      client.join(existingChat.id.toString());
-
-      //Enviar los mensajes
-      client.emit('messages', messages);
-      // Optionally, you can emit an event or perform actions related to the joined chat
-      this.server.to(existingChat.id.toString()).emit('userJoined', { userId: senderUserId, action: 'joined' });
-    }
-  }
-  */
-
-  // @SubscribeMessage('sendMessage')
-  // async sendMessage(client: Socket, payload: { chat: string, message: CreateMessageDto }) {
-  //   const { chat, message } = payload;
-  //   console.log('message: ', message);
-
-  //   //Existe el chat: llamar al crear mensaje
-  //   const messageSend = await this.chatService.sendMessage(message);
-
-  //   this.server.to(chat).emit('message', messageSend);
-  // }
-
   /**
    * ENVIAR UN MENSAJE A CHAT YA CREADO
    * @param client 
@@ -149,16 +112,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
    */
   @SubscribeMessage('sendMessage')
   async sendMessage(client: Socket, payload: { receivingUserId: number, message: CreateMessageDto, audioFile?: Buffer }) {
+    console.log('PAYLOAD SEND MSG', payload)
 
     const { receivingUserId, message, audioFile } = payload;
     let savedMessage;
 
-    if (message.resources[0].type !== 'A' || !audioFile) {
-      // Save the message
-      savedMessage = await this.chatService.sendMessage(message, receivingUserId);
-    } else {
-      // Save the message
-      savedMessage = await this.chatService.sendMessage(message, receivingUserId, audioFile);
+    try {
+      if (message.resources[0].type !== 'A' || !audioFile) {
+        // Save the message
+        savedMessage = await this.chatService.sendMessage(message, receivingUserId);
+        console.log('text',savedMessage)
+      } else {
+        // Save the message
+        savedMessage = await this.chatService.sendMessage(message, receivingUserId, audioFile);
+        console.log('audio',savedMessage)
+      }
+    } catch (error) {
+      console.error('Error sending message: ', error);
+      return;
     }
 
     // Emit the message to the sender
