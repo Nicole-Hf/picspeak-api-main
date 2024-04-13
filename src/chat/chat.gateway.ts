@@ -94,7 +94,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (existingChat) {
       //Traer las conversaciones
-      const messages = await this.chatService.getAllChatsForUser(existingChat.id);
+      const messages = await this.chatService.getMessagesByChatId(existingChat.id);
       console.log('MENSAJES CHAT', messages)
 
       //Enviar los mensajes

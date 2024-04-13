@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { urlencoded, json } from 'express';
 
 async function bootstrap() {
+  process.env.TZ = 'America/Los_Angeles'
   const app = await NestFactory.create(AppModule, { cors: true });
   app.setGlobalPrefix('api/v1');
   app.enableCors();
