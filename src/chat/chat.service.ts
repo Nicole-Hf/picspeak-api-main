@@ -9,12 +9,14 @@ import { In, MoreThan, Repository } from 'typeorm';
 import { OfflineMessage } from './entity/offlineMessage.entity';
 import { OfflineMessageDto } from './dto/offlineMessage.dto';
 import { GoogleCloudService } from '../google-cloud/google-cloud.service';
+import { Message } from 'src/message/entities/message.entity';
 
 @Injectable()
 export class ChatService {
     constructor(
         @InjectRepository(Chat)
         private readonly chatRepository: Repository<Chat>,
+        private readonly messageRepository: Repository<Message>,
 
         private readonly userService: UsersService,
 
@@ -73,19 +75,29 @@ export class ChatService {
      * @returns 
      */
     async getMessagesByChatId(chatId: number): Promise<any[]> {
-        const query = `
+        /*  const query = `
             SELECT * FROM public.message ms
             LEFT JOIN public.text tx on tx."messageId" = ms."id"
             LEFT JOIN public.image im on im."messageId" = ms."id"
             LEFT JOIN public.audio aud on aud."messageId" = ms."id"
             WHERE "chatId" = $1
-            ORDER BY ms."created_at" ASC;
+            ORDER BY ms."id" ASC;
         `;
 
         const results = await this.chatRepository.query(query, [chatId]);
         console.log('RESULTADOS MESAJE', results)
 
-        return results;
+        return results; */
+
+        const messages = await this.messageRepository.createQueryBuilder('message')
+            .leftJoinAndSelect('message.text', 'text')
+            .leftJoinAndSelect('message.image', 'image')
+            .leftJoinAndSelect('message.audio', 'audio')
+            .where('message.chatId = :chatId', { chatId })
+            .orderBy('message.id', 'ASC')
+            .getMany();
+
+        return messages;
     }
 
     async findExistingChat(senderUserId: number, receivingUserId: number): Promise<Chat | undefined> {
