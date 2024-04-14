@@ -16,6 +16,8 @@ export class ChatService {
     constructor(
         @InjectRepository(Chat)
         private readonly chatRepository: Repository<Chat>,
+
+        @InjectRepository(Message)
         private readonly messageRepository: Repository<Message>,
 
         private readonly userService: UsersService,
