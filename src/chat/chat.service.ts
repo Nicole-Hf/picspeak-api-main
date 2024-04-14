@@ -77,7 +77,7 @@ export class ChatService {
      * @returns 
      */
     async getMessagesByChatId(chatId: number): Promise<any[]> {
-        /*  const query = `
+        const query = `
             SELECT * FROM public.message ms
             LEFT JOIN public.text tx on tx."messageId" = ms."id"
             LEFT JOIN public.image im on im."messageId" = ms."id"
@@ -89,9 +89,9 @@ export class ChatService {
         const results = await this.chatRepository.query(query, [chatId]);
         console.log('RESULTADOS MESAJE', results)
 
-        return results; */
+        return results;
 
-        const messages = await this.messageRepository.createQueryBuilder('message')
+        /* const messages = await this.messageRepository.createQueryBuilder('message')
             .leftJoinAndSelect('message.text', 'text')
             .leftJoinAndSelect('message.image', 'image')
             .leftJoinAndSelect('message.audio', 'audio')
@@ -99,7 +99,7 @@ export class ChatService {
             .orderBy('message.id', 'ASC')
             .getMany();
 
-        return messages;
+        return messages; */
     }
 
     async findExistingChat(senderUserId: number, receivingUserId: number): Promise<Chat | undefined> {
