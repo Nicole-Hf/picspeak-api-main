@@ -9,10 +9,11 @@ import { AwsModule } from 'src/aws/aws.module';
 import { ChatGptAiModule } from 'src/chat-gpt-ai/chat-gpt-ai.module';
 import { GoogleCloudModule } from 'src/google-cloud/google-cloud.module';
 import { Audio } from './entities/audio.entity';
+import { Video } from './entities/video.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Resource, Text, Image, Audio]),
+    TypeOrmModule.forFeature([Resource, Text, Image, Audio, Video]),
     AwsModule,
     ChatGptAiModule,
     GoogleCloudModule,

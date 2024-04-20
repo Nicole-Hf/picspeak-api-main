@@ -34,10 +34,10 @@ export class ResourcesController {
   async verifyContent(@UploadedFile() image, @Res() res) {
     try {
       const result = await this.resourcesService.getLabelFromRekognition(image);
-       return res.send({ result });
+        return res.send({ result });
     } catch (error) {
-       console.error(error);
-     return res.status(500).send({ error: error.message });
-     }
+      console.error(error);
+      return res.status(500).send({ error: error.message });
+    }
   } */
 }

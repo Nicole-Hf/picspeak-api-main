@@ -8,6 +8,7 @@ import { ResourcesService } from 'src/resources/resources.service';
 import { Chat } from './entities/chat.entity';
 import { ConfigurationService } from 'src/configuration/configuration.service';
 import * as tzOffset from 'tz-offset';
+
 @Injectable()
 export class MessageService {
   constructor(
@@ -33,6 +34,7 @@ export class MessageService {
     const images = resources.filter(resource => resource?.type === 'I');
     const texts = resources.filter(resource => resource?.type === 'T');
     const audios = resources.filter(resource => resource?.type === 'A');
+    const videos = resources.filter(resource => resource?.type === 'V');
 
     // Crear el mensaje
     const message = this.messageRepository.create({
@@ -44,6 +46,7 @@ export class MessageService {
       text: await Promise.all(texts.map(text => this.resourceService.createText(text))),
       image: await Promise.all(images.map(image => this.resourceService.createImage(image))),
       audio: await Promise.all(audios.map(audio => this.resourceService.createAudio(audio))),
+      video: await Promise.all(videos.map(video => this.resourceService.createVideo(video)))
     });
     console.log('Message - Create message', message)
 

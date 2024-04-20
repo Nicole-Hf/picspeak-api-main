@@ -40,9 +40,9 @@ import { GoogleCloudModule } from './google-cloud/google-cloud.module';
         autoLoadEntities: true,
         synchronize: true,
         cache: false,
-        /* ssl: {
+        ssl: {
           rejectUnauthorized: false,
-        }, */
+        }, 
       }),
       inject: [ConfigService],
     }),

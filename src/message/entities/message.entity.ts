@@ -1,11 +1,11 @@
 // import { IndividualUser } from "src/individual-users/entities/individual-user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, UpdateDateColumn } from "typeorm";
 import { Chat } from "./chat.entity";
-import { Resource } from "src/resources/entities/resource.entity";
 import { IndividualUser } from "src/users/entities/individual-user.entity";
 import { Text } from "src/resources/entities/text.entity";
 import { Image } from "src/resources/entities/image.entity";
 import { Audio } from "src/resources/entities/audio.entity";
+import { Video } from "src/resources/entities/video.entity";
 
 @Entity()
 export class Message {
@@ -39,4 +39,7 @@ export class Message {
 
   @OneToMany(() => Audio, (audio) => audio.message)
   audio?: Audio[];
+
+  @OneToMany(() => Video, (video) => video.message)
+  video?: Video[];
 }

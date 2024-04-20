@@ -10,6 +10,7 @@ import { ChatGptAiService } from 'src/chat-gpt-ai/chat-gpt-ai.service';
 import { CreateTextDto } from './dto/create-text.dto';
 import { GoogleCloudService } from '../google-cloud/google-cloud.service';
 import { Audio } from './entities/audio.entity';
+import { Video } from './entities/video.entity';
 
 @Injectable()
 export class ResourcesService {
@@ -25,6 +26,9 @@ export class ResourcesService {
 
     @InjectRepository(Audio)
     private readonly audioRepository: Repository<Audio>,
+
+    @InjectRepository(Video)
+    private readonly videoRepository: Repository<Video>,
 
     private readonly awsService: AwsService,
     private readonly chatGptAiService: ChatGptAiService,
@@ -117,6 +121,23 @@ export class ResourcesService {
     });
 
     return await this.audioRepository.save(audio);
+  }
+
+  async createVideo(createResourceDto: CreateResourceDto) {
+    const base64Video = createResourceDto.pathDevice; //.replace(/^data:video\/[a-z]+;base64,/, '');
+    console.log('VIDEO', base64Video)
+    const videoBytes = Buffer.from(base64Video, 'base64');
+    console.log('buffer', videoBytes)
+    const key = `${Date.now().toString()}-picspeak`;
+    const uploadVideo = await this.awsService.uploadVideoToS3(videoBytes, key);
+
+    const video = this.videoRepository.create({
+      url: uploadVideo.videoUrl,
+      pathDevice: uploadVideo.videoUrl,
+      type: 'V'
+    });
+
+    return await this.videoRepository.save(video);
   }
 
   findAll() {

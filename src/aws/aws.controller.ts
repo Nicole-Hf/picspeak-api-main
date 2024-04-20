@@ -34,4 +34,13 @@ export class AwsController {
     ) {
     return this.awsService.uploadAudioToS3(audio.buffer);
   }
+
+  @Post('upload/video')
+  @UseInterceptors(FileInterceptor('video'))
+  uploadVideo(
+    @UploadedFile() video: Express.Multer.File,
+    ) {
+      console.log('controller')
+    return this.awsService.uploadVideoToS3(video.buffer);
+  }
 }
