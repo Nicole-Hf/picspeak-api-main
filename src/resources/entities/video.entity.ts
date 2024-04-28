@@ -7,10 +7,10 @@ export class Video extends Resource {
     @Column({ primary: true, generated: true})
     id: number;
 
-    @Column({ nullable: false})
+    @Column({ nullable: false, name: 'video_url'})
     url: string;
 
-    @Column({ nullable: false, name: 'path_device'})
+    @Column({ nullable: false, name: 'video_path'})
     pathDevice: string;
 
     @ManyToOne(() => Message, (message) => message.image)
