@@ -220,7 +220,12 @@ export class ChatService {
 
         const results = await this.chatRepository.query(query, [userId]);
 
-        return results;
+        const resultsWithUserId = results.map(result => ({
+            ...result,
+            userId: userFound.id
+        }));
+
+        return resultsWithUserId;
     }
 
     async getAllChatsForUser(userId: number): Promise<Chat[]> {
