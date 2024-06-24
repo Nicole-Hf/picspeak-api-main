@@ -157,7 +157,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const offlineMessage = {
         senderId: message.userId,
         receiverId: receivingUserId,
-        content: savedMessage.text[0]?.textOrigin || savedMessage.image[0]?.url || savedMessage.audio[0]?.translatedAudioUrl,
+        content: savedMessage.text[0]?.textOrigin || savedMessage.image[0]?.url || savedMessage.audio[0]?.translatedAudioUrl || savedMessage.video[0]?.url,
       }
 
       // Guardar en BD
